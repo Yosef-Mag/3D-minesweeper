@@ -1,45 +1,62 @@
-// in Canvas.tsx
+import { useState } from "react";
 import { Canvas as ThreeCanvas } from "@react-three/fiber";
-import { CameraControls, StatsGl } from "@react-three/drei";
-import Cell from "./Cell";
-import MapOverlay from "./MapOverlay";
+import { CameraControls, Sky, StatsGl } from "@react-three/drei";
+import { GameBoard, GameStateManager } from "../../engine";
+import HUD from "../UI/HUD";
+import MainMenu from "../UI/MainMenu";
 
-export default function Canvas() {
-  const GRID_SIZE = 9;
-  const TILE_SIZE = 1;
-  const HALF = ((GRID_SIZE - 1) * TILE_SIZE) / 2;
+const Canvas = () => {
+  const [gameManager, setGameManager] = useState<GameStateManager | null>(null);
 
-  const waters = [];
-  for (let i = 0; i < GRID_SIZE; i++) {
-    for (let j = 0; j < GRID_SIZE; j++) {
-      const x = i * TILE_SIZE - HALF;
-      const z = j * TILE_SIZE - HALF;
-      waters.push(<Cell key={`${i}-${j}`} position={[x, 1, z]} />);
-    }
-  }
+  const handleSelect = (rows: number, cols: number, mines: number) => {
+    setGameManager(new GameStateManager(rows, cols, mines));
+  };
+
+  const handleMainMenu = () => {
+    setGameManager(null);
+  };
 
   return (
-    <ThreeCanvas
-      className="noselect pointer-events-none h-screen w-screen bg-[#55A7A1]"
-      camera={{ fov: 60, near: 0.1, far: 1_000_000 }}
-      onContextMenu={() => false}
-      eventSource={document.getElementById("canvas-container")!}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-      }}
-      gl={{ powerPreference: "high-performance", logarithmicDepthBuffer: true }}
-    >
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} />
-      <MapOverlay gridSize={GRID_SIZE} tileSize={TILE_SIZE} />
-      {waters}
-
-      <CameraControls makeDefault dollyToCursor />
-      <StatsGl className="absolute top-0 left-0" />
-    </ThreeCanvas>
+    <>
+      {!gameManager && <MainMenu onSelect={handleSelect} />}
+      {gameManager && (
+        <HUD gameManager={gameManager} onMainMenu={handleMainMenu} />
+      )}
+      {gameManager && (
+        <ThreeCanvas
+          className="h-screen w-screen bg-[#F8F4EC]"
+          camera={{ fov: 60, near: 0.1, far: 1_000_000 }}
+          onContextMenu={() => false}
+          eventSource={document.getElementById("canvas-container")!}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+          gl={{
+            powerPreference: "high-performance",
+            logarithmicDepthBuffer: true,
+          }}
+        >
+          <Sky
+            distance={450000}
+            sunPosition={[0, 1, 0]}
+            inclination={0}
+            azimuth={0.25}
+          />
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[5, 10, 5]} intensity={1} />
+          <GameBoard gameManager={gameManager} />
+          <CameraControls makeDefault dollyToCursor />
+          {import.meta.env.DEV && (
+            <StatsGl className="absolute bottom-0 left-0" />
+          )}
+        </ThreeCanvas>
+      )}
+    </>
   );
-}
+};
+
+export default Canvas;
