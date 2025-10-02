@@ -190,8 +190,8 @@ export class GameEngine {
   }
 
   private revealAllMines(): void {
-    this.state.grid = this.state.grid.map((row, i) =>
-      row.map((cell, j) =>
+    this.state.grid = this.state.grid.map((row) =>
+      row.map((cell) =>
         cell.value === -1 ? { ...cell, revealed: true } : cell
       )
     );
@@ -225,3 +225,4 @@ export class GameEngine {
     return this.state.flagCount;
   }
 }
+

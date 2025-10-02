@@ -1,7 +1,7 @@
 import { GameCell } from "./GameCell";
 import { GameStateManager } from "./GameStateManager";
 import { type GameState, type Cell } from "./GameEngine";
-import { useEffect, useState, useCallback, memo, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 interface IGameBoardProps {
   gameManager: GameStateManager;
@@ -82,3 +82,4 @@ export const GameBoard = ({ gameManager }: IGameBoardProps) => {
     </group>
   );
 };
+
